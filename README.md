@@ -14,7 +14,8 @@
 {
   "email": "user@test.com",
   "password": "password123",
-  "nickname": "은석"
+  "nickname": "은석",
+  "phone" : "01012345678"
 }
 ```
 
