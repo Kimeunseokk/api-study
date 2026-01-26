@@ -24,5 +24,9 @@ public class User {
     private String email;
     @Column
     private String phone;
+    @Column
+    private String RefreshToken;
+    @Column
+    private String role;
 
 }

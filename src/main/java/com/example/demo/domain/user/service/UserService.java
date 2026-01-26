@@ -36,9 +36,7 @@ public class UserService {
 
 //    @Transactional // 정보수정
 //    public UserMeResponse login(String email, String password) {
-//        if(userRepository.equals(email) && userRepository.equals(password)) {
 //
-//        }
 //    }
 
 }
