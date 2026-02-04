@@ -11,7 +11,7 @@ import jakarta.persistence.Id;
 @Entity
 @Getter
 @Setter
-public class User {
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,5 +28,15 @@ public class User {
     private String RefreshToken;
     @Column
     private String role;
+    @Column
+    private String nickname;
+
+    public Users(String username, String password,  String email, String phone, String nickname){
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.phone = phone;
+        this.nickname = nickname;
+    }
 
 }

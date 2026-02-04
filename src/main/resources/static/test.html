@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Auth API Test</title>
+</head>
+<body>
+
+<h2>회원가입</h2>
+<input id="signup-email" placeholder="email"><br>
+<input id="signup-password" placeholder="password" type="password"><br>
+<input id="signup-nickname" placeholder="nickname"><br>
+<button onclick="signup()">회원가입</button>
+
+<hr>
+
+<h2>로그인</h2>
+<input id="login-email" placeholder="email"><br>
+<input id="login-password" placeholder="password" type="password"><br>
+<button onclick="login()">로그인</button>
+
+<hr>
+
+<h2>결과</h2>
+<pre id="result"></pre>
+
+<script>
+    function signup() {
+        fetch("/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: document.getElementById("signup-email").value,
+                password: document.getElementById("signup-password").value,
+                nickname: document.getElementById("signup-nickname").value
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("result").innerText =
+                "회원가입 결과:\n" + JSON.stringify(data, null, 2);
+        })
+        .catch(err => alert(err));
+    }
+
+    function login() {
+        fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: document.getElementById("login-email").value,
+                password: document.getElementById("login-password").value
+            })
+        })
+        .then(res => res.text())
+        .then(token => {
+            document.getElementById("result").innerText =
+                "JWT 토큰:\n" + token;
+        })
+        .catch(err => alert(err));
+    }
+</script>
+
+</body>
+</html>
