@@ -14,11 +14,11 @@ public class UserSignupRequest {
 
     public Users toEntity(String encodedPassword) {
         return new Users(
-                username,
-                email,
-                encodedPassword,
-                nickname,
-                phone
+                this.username,   // 1. username
+                encodedPassword, // 2. password
+                this.email,      // 3. email
+                this.phone,      // 4. phone
+                this.nickname    // 5. nickname
         );
     }
 }

@@ -29,8 +29,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/","/login","/users/signup","/h2-console/**").permitAll()
                         .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        // 로그인 성공 시 자동으로 이동할 페이지를 설정합니다.
+                        .defaultSuccessUrl("/")
+                        // 로그인 페이지 자체와 로그인 처리 경로에 대해 모든 접근을 허용합니다.
+                        .permitAll()
                 );
 
         return http.build();
