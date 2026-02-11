@@ -29,7 +29,7 @@ public class CustomUserDatailsService implements UserDetailsService {
         return User.builder()
                 .username(users.getEmail())   // 로그인 기준
                 .password(users.getPassword())
-                .roles((users.getRole() == null) ? "USER" : users.getRole())       // "USER", "ADMIN"
+                .roles(String.valueOf(users.getRole()))       // "USER", "ADMIN"
                 .build();
     }
 }

@@ -1,13 +1,9 @@
 package com.example.demo.domain.user.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.persistence.Id;
 
 @Entity
 @Getter
@@ -28,8 +24,10 @@ public class Users {
     private String phone;
     @Column
     private String RefreshToken;
-    @Column
-    private String role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.USER;
     @Column
     private String nickname;
 
@@ -39,7 +37,7 @@ public class Users {
         this.email = email;
         this.phone = phone;
         this.nickname = nickname;
-        this.role = "User";
+        this.role = role;
     }
 
 }
