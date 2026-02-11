@@ -23,10 +23,13 @@ public class CustomUserDatailsService implements UserDetailsService {
                         new UsernameNotFoundException("User not found: " + email)
                 );
 
+        // role이 null일 경우를 대비해 기본값 설정
+
+
         return User.builder()
                 .username(users.getEmail())   // 로그인 기준
                 .password(users.getPassword())
-                .roles(users.getRole())       // "USER", "ADMIN"
+                .roles((users.getRole() == null) ? "USER" : users.getRole())       // "USER", "ADMIN"
                 .build();
     }
 }
