@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="|${pageName}|"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <script th:src="@{/js/user.js}"></script>
 </head>
 <body>
 <div>
@@ -12,7 +14,7 @@
     <form th:method="post" th:action="|@{/{loginType}/login (loginType=${loginType})}|" th:object="${loginRequest}">
         <div>
             <label th:for="loginId">로그인 아이디 : </label>
-            <input type="text" th:field="*{loginId}"/>
+            <input type="text" th:field="*{email}"/>
         </div>
         <br/>
         <div>

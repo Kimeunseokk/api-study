@@ -4,11 +4,13 @@ import com.example.demo.domain.user.entity.Users;
 import lombok.Getter;
 import lombok.Setter;
 
+@Setter
 @Getter
 public class UserSignupRequest {
     private String username;
     private String email;
     private String password;
+    private String passwordCheck;
     private String nickname;
     private String phone;
 

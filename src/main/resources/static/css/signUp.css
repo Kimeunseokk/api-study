@@ -1,0 +1,9 @@
+/* 공통 에러 스타일 */
+.error-class {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+.error-input {
+    border-color: red;
+}

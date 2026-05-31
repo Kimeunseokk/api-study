@@ -9,7 +9,6 @@ import com.example.demo.security.JwtProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,34 +17,31 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
-@Controller
-@RequestMapping("/{loginType}") // HTML 폼 주소(/{loginType}/...)와 맞춤
+@Controller // HTML 화면 렌더링을 위한 컨트롤러
+@RequestMapping("/{loginType}") // HTML 폼 주소 구조(/{loginType}/...)와 매핑
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
     private final JwtProvider jwtprovider;
     private final AuthenticationManager authenticationManager;
     private final CustomUserDatailsService userDatailsService;
 
     // ==============================================================================
-    // [현재 사용 중: 타임리프 HTML 연동용 코드 - @Controller 방식]
+    // [타임리프(Thymeleaf) HTML 연동용 메서드]
     // ==============================================================================
 
     // 1. 홈 화면 열기
-    @GetMapping
+    @GetMapping("/home")
     public String home(@PathVariable String loginType, Long userId, Model model) {
         model.addAttribute("loginType", loginType);
         model.addAttribute("pageName", "홈 화면");
 
         Users loginUser = userService.getLoginUserById(userId);
-        if(loginUser == null) {
-            model.addAttribute("nickname", null);
-        } else {
-            model.addAttribute("nickname", loginUser.getNickname());
+        if(loginUser != null) {
+            model.addAttribute("nickname", loginUser.getNickname()); // 로그인 상태일 때 닉네임 전달
         }
-        return "home";
+        return "home"; // templates/home.html 파일을 렌더링
     }
 
     // 2. 회원가입 화면 열기
@@ -53,15 +49,18 @@ public class UserController {
     public String signupForm(@PathVariable String loginType, Model model) {
         model.addAttribute("loginType", loginType);
         model.addAttribute("pageName", "회원가입");
-        model.addAttribute("joinRequest", new UserSignupRequest());
-        return "signup";
+        model.addAttribute("joinRequest", new UserSignupRequest()); // HTML의 th:object="${joinRequest}"와 바인딩
+        return "signup"; // templates/signup.html 파일을 렌더링
     }
 
     // 3. 회원가입 처리
     @PostMapping("/join")
     public String signup(@PathVariable String loginType, @ModelAttribute("joinRequest") UserSignupRequest userSignupRequest) {
+        // @RequestBody 대신 @ModelAttribute를 사용하여 폼 데이터를 수신합니다.
+        // DTO와 HTML 폼 양쪽에 이름(username), 이메일(email), 비밀번호(password),
+        // 닉네임(nickname), 전화번호(phone) 필드가 정확히 매핑됩니다.
         userService.signup(userSignupRequest);
-        return "redirect:/" + loginType;
+        return "redirect:/" + loginType; // 가입 완료 후 홈 화면으로 이동
     }
 
     // 4. 로그인 화면 열기
@@ -69,75 +68,31 @@ public class UserController {
     public String loginForm(@PathVariable String loginType, Model model) {
         model.addAttribute("loginType", loginType);
         model.addAttribute("pageName", "로그인");
-        model.addAttribute("loginRequest", new UserLoginRequest());
-        return "login";
+        model.addAttribute("loginRequest", new UserLoginRequest()); // HTML의 th:object="${loginRequest}"와 바인딩
+        return "login"; // templates/login.html 파일을 렌더링
     }
 
-    // 5. 로그인 처리 (JWT를 쿠키에 담아서 응답)
+    // 5. 로그인 처리 및 JWT 발급
     @PostMapping("/login")
     public String login(@PathVariable String loginType,
                         @ModelAttribute("loginRequest") UserLoginRequest userLoginRequest,
                         HttpServletResponse response) {
 
-        // HTML의 th:field="*{loginId}"와 맞추기 위해 getLoginId()를 사용합니다.
-        // (만약 DTO에 아직 email로 되어있다면 HTML이나 DTO 둘 중 하나를 통일해주세요!)
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(userLoginRequest.getLoginId(), userLoginRequest.getPassword())
-        );
-
-        User user = (User) authentication.getPrincipal();
-        String token = jwtprovider.createToken(user.getUsername(), user.getAuthorities().iterator().next().getAuthority());
-
-        // 브라우저가 토큰을 기억할 수 있도록 쿠키에 저장
-        Cookie jwtCookie = new Cookie("jwtToken", token);
-        jwtCookie.setPath("/");
-        jwtCookie.setHttpOnly(true);
-        response.addCookie(jwtCookie);
-
-        return "redirect:/" + loginType;
-    }
-
-    // ==============================================================================
-    // [백업: 기존 Postman 테스트 및 향후 앱 연동용 API 코드 - 주석 처리됨]
-    // - 나중에 플러터나 리액트와 연결할 때 주석을 해제하고 @RestController로 변경하세요.
-    // - 참고: @RequestMapping("/{loginType}") 경로 아래에 있으므로,
-    //   나중에 API용으로 쓸 때는 @RequestMapping("/api/users") 등으로 분리하는 것이 좋습니다.
-    // ==============================================================================
-    /*
-    @GetMapping("/api-home")
-    public ResponseEntity<?> homeApi(Long userId){
-        Users loginUser = userService.getLoginUserById(userId);
-        if(loginUser == null) {
-            return ResponseEntity.ok().body(
-                    Map.of(
-                            "login", false,
-                            "loginType", "cookie-login"
-                    )
-            );
-        }
-        return ResponseEntity.ok().body(
-                Map.of(
-                        "login", true,
-                        "loginType", "cookie-login",
-                        "nickname", loginUser.getNickname()
-                )
-        );
-    }
-
-    @PostMapping("/signup") // 회원가입
-    public ResponseEntity<?> signupApi(@RequestBody UserSignupRequest userSignupRequest) {
-        userService.signup(userSignupRequest);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/login") // 로그인
-    public ResponseEntity<?> loginApi(@RequestBody UserLoginRequest userLoginRequest) {
+        // DTO의 email을 기준으로 스프링 시큐리티 인증을 시도합니다.
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userLoginRequest.getEmail(), userLoginRequest.getPassword())
         );
+
+        // 인증 성공 시 JWT 토큰 생성
         User user = (User) authentication.getPrincipal();
         String token = jwtprovider.createToken(user.getUsername(), user.getAuthorities().iterator().next().getAuthority());
-        return ResponseEntity.ok().body(token);
+
+        // 생성된 JWT 토큰을 브라우저의 쿠키(Cookie)에 저장하여 다음 요청 시 활용할 수 있게 합니다.
+        Cookie jwtCookie = new Cookie("jwtToken", token);
+        jwtCookie.setPath("/"); // 모든 경로에서 이 쿠키를 사용할 수 있도록 설정
+        jwtCookie.setHttpOnly(true); // 자바스크립트에서 접근할 수 없도록 하여 XSS 공격 방어
+        response.addCookie(jwtCookie); // 응답에 쿠키 추가
+
+        return "redirect:/" + loginType; // 로그인 성공 후 홈 화면으로 이동
     }
-    */
 }
