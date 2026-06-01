@@ -7,14 +7,15 @@
         .error-class { color: red; }
         .error-input { border-color: red; }
     </style>
-    <link rel="stylesheet" th:href="@{/css/style.css}" />
-    <script th:src="@{/js/user.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/join.css}" />
+    <script th:src="@{/js/join.js}"></script>
 </head>
 <body>
 <div>
     <h1><a th:href="|/${loginType}|">[[${pageName}]]</a></h1> <hr/>
     <h2>회원 가입</h2>
-    <form th:method="post" th:action="|@{/{loginType}/join (loginType=${loginType})}|" th:object="${joinRequest}">
+
+    <form th:method="post" th:action="|@{/{loginType}/join (loginType=${loginType})}|" th:object="${joinRequest}" onsubmit="return validateSignup()">
 
         <div>
             <label th:for="username">이름 : </label>
@@ -62,4 +63,4 @@
     </form>
 </div>
 </body>
-</html>ㅇ
+</html>
