@@ -60,7 +60,7 @@ public class UserController {
         // DTO와 HTML 폼 양쪽에 이름(username), 이메일(email), 비밀번호(password),
         // 닉네임(nickname), 전화번호(phone) 필드가 정확히 매핑됩니다.
         userService.signup(userSignupRequest);
-        return "redirect:/login"; // 가입 완료 후 로그인 화면으로 이동
+        return "redirect:/"+ loginType + "/login"; // 가입 완료 후 로그인 화면으로 이동
     }
 
     // 4. 로그인 화면 열기
@@ -93,6 +93,6 @@ public class UserController {
         jwtCookie.setHttpOnly(true); // 자바스크립트에서 접근할 수 없도록 하여 XSS 공격 방어
         response.addCookie(jwtCookie); // 응답에 쿠키 추가
 
-        return "redirect:/" + loginType; // 로그인 성공 후 홈 화면으로 이동
+        return "redirect:/" + loginType + "/home"; // 로그인 성공 후 홈 화면으로 이동
     }
 }
