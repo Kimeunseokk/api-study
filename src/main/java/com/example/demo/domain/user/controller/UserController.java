@@ -91,14 +91,7 @@ public class UserController {
         System.out.println("전달받은 비밀번호: " + userLoginRequest.getPassword());
 
         try {
-            // DTO의 email을 기준으로 스프링 시큐리티 인증을 시도합니다.
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userLoginRequest.getEmail(), userLoginRequest.getPassword())
-            );
-
-            // 인증 성공 시 JWT 토큰 생성
-            User user = (User) authentication.getPrincipal();
-            String token = jwtprovider.createToken(user.getUsername(), user.getAuthorities().iterator().next().getAuthority());
+            String token = userService.authenticateAndGenerateToken(userLoginRequest);
 
             // 생성된 JWT 토큰을 브라우저의 쿠키(Cookie)에 저장하여 다음 요청 시 활용할 수 있게 합니다.
             Cookie jwtCookie = new Cookie("jwtToken", token);
