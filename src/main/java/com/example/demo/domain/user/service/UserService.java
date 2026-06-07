@@ -3,6 +3,7 @@ package com.example.demo.domain.user.service;
 import com.example.demo.config.SecurityConfig;
 import com.example.demo.domain.user.dto.UserLoginRequest;
 import com.example.demo.domain.user.dto.UserSignupRequest;
+import com.example.demo.domain.user.dto.UserUpdateRequest;
 import com.example.demo.domain.user.entity.Users;
 import com.example.demo.security.JwtProvider;
 import com.example.demo.domain.user.repository.UserRepository;
@@ -54,15 +55,6 @@ public class UserService {
         return userRepository.existsByUsername(username);
     } // 회원가입시
 
-    @Transactional
-    public Users getLoginUserById(Long userId) {
-        if(userId == null) return null;
-
-        Optional<Users> optionalUser = userRepository.findById(userId);
-        if(optionalUser.isEmpty()) return null;
-
-        return optionalUser.get();
-    }
 
     @Transactional
     public void signup(UserSignupRequest Request) {
@@ -88,12 +80,34 @@ public class UserService {
         System.out.println("저장된 유저 ID: " + savedUser.getId());
     }
 
-    @Transactional
-    public void checkinfo(Long userId){
-
+    public Users findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 유저를 찾을 수 없습니다."));
     }
 
+    @Transactional
+    public void updateUser(String email, UserUpdateRequest request) {
+        Users user = findByEmail(email);
 
+        if (request.getNickname() != null && !request.getNickname().isBlank()) {
+            if (!user.getNickname().equals(request.getNickname()) && checkNicknamedouplication(request.getNickname())) {
+                throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+            }
+            user.setNickname(request.getNickname());
+        }
 
+        if (request.getPhone() != null && !request.getPhone().isBlank()) {
+            if (!user.getPhone().equals(request.getPhone()) && checkPhoneduplication(request.getPhone())) {
+                throw new IllegalArgumentException("이미 사용 중인 전화번호입니다.");
+            }
+            user.setPhone(request.getPhone());
+        }
 
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            if (!request.getPassword().equals(request.getPasswordCheck())) {
+                throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            }
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+    }
 }

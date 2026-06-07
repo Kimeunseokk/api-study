@@ -8,7 +8,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create # ?? ? ??? ??? ?? ???
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
@@ -17,5 +17,9 @@ spring:
   h2:
     console:
       enabled: true
-  server:
-    port: 8080
+
+jwt:
+  secret: mysecretkeymysecretkeymysecretkeymysecretkey
+
+server:
+  port: 8080

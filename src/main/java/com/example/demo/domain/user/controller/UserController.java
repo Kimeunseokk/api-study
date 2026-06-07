@@ -2,6 +2,7 @@ package com.example.demo.domain.user.controller;
 
 import com.example.demo.domain.user.dto.UserLoginRequest;
 import com.example.demo.domain.user.dto.UserSignupRequest;
+import com.example.demo.domain.user.dto.UserUpdateRequest;
 import com.example.demo.domain.user.entity.Users;
 import com.example.demo.domain.user.service.CustomUserDatailsService;
 import com.example.demo.domain.user.service.UserService;
@@ -36,16 +37,15 @@ public class UserController {
         model.addAttribute("loginType", loginType);
         model.addAttribute("pageName", "홈 화면");
 
-        // Principal 객체에는 JwtFilter에서 세팅해 둔 유저의 정보(보통 username이나 email)가 들어있습니다.
         if (principal != null) {
-            String username = principal.getName();
+            Users loginUser = userService.findByEmail(principal.getName());
 
-            // TODO: 나중에는 username(또는 이메일)으로 DB에서 유저를 찾아 닉네임을 띄워주시면 됩니다.
-            // Users loginUser = userService.findByUsername(username);
-            // model.addAttribute("nickname", loginUser.getNickname());
-
-            // 지금은 렌더링이 잘 되는지 확인하기 위해 임시로 아이디를 출력해 봅니다.
-            model.addAttribute("nickname", username + "님");
+            // 🚨 방어 코드 추가! (만약 토큰은 있는데 DB에서 유저가 삭제된 상태라면?)
+            if (loginUser != null) {
+                model.addAttribute("nickname", loginUser.getNickname());
+            } else {
+                model.addAttribute("nickname", "알 수 없는 사용자");
+            }
         }
 
         return "home"; // templates/home.html 파일을 렌더링
@@ -102,14 +102,41 @@ public class UserController {
             return "redirect:/" + loginType + "/home"; // 로그인 성공 후 홈 화면으로 이동
 
         } catch (AuthenticationException e) {
-            // 🚨 인증 실패 (아이디/비밀번호 틀림 등) 시 403 에러 페이지로 튕기는 것을 막아줍니다!
             System.out.println("로그인 실패 원인: " + e.getMessage());
-
-            // HTML 화면에 보여줄 에러 메시지를 담아서 다시 로그인 화면을 보여줍니다.
             model.addAttribute("loginError", "아이디 또는 비밀번호가 일치하지 않습니다.");
             model.addAttribute("loginType", loginType);
-
             return "login";
+        }
+    }
+
+    // 6. 회원정보 조회 화면
+    @GetMapping("/info")
+    public String infoForm(@PathVariable String loginType, Principal principal, Model model) {
+        Users loginUser = userService.findByEmail(principal.getName());
+        model.addAttribute("loginType", loginType);
+        model.addAttribute("pageName", "회원정보");
+        model.addAttribute("user", loginUser);
+        model.addAttribute("updateRequest", new UserUpdateRequest());
+        return "info";
+    }
+
+    // 7. 회원정보 수정 처리
+    @PostMapping("/info")
+    public String updateInfo(@PathVariable String loginType,
+                             @ModelAttribute("updateRequest") UserUpdateRequest updateRequest,
+                             Principal principal,
+                             Model model) {
+        try {
+            userService.updateUser(principal.getName(), updateRequest);
+            return "redirect:/" + loginType + "/info?success";
+        } catch (IllegalArgumentException e) {
+            Users loginUser = userService.findByEmail(principal.getName());
+            model.addAttribute("loginType", loginType);
+            model.addAttribute("pageName", "회원정보");
+            model.addAttribute("user", loginUser);
+            model.addAttribute("updateRequest", updateRequest);
+            model.addAttribute("updateError", e.getMessage());
+            return "info";
         }
     }
 }
