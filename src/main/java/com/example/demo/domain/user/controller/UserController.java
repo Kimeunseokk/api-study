@@ -109,7 +109,22 @@ public class UserController {
         }
     }
 
-    // 6. 회원정보 조회 화면
+    // 6. 회원 탈퇴
+    @PostMapping("/withdraw")
+    public String withdraw(@PathVariable String loginType, Principal principal, HttpServletResponse response) {
+        userService.deleteUser(principal.getName());
+
+        Cookie expiredCookie = new Cookie("jwtToken", null);
+        expiredCookie.setMaxAge(0);
+        expiredCookie.setPath("/");
+        response.addCookie(expiredCookie);
+
+        System.out.println("탈퇴 전달받은 이메일: " + principal.getName());
+
+        return "redirect:/" + loginType + "/login";
+    }
+
+    // 7. 회원정보 조회 화면
     @GetMapping("/info")
     public String infoForm(@PathVariable String loginType, Principal principal, Model model) {
         Users loginUser = userService.findByEmail(principal.getName());

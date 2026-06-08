@@ -12,7 +12,7 @@
 
 ```json
 {
-  "email": "user@test.com",
+  "email": "user@test.com",그
   "password": "password123",
   "nickname": "은석",
   "phone": "01012345678",

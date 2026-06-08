@@ -85,5 +85,15 @@
         <a th:href="|/${loginType}/home|" class="btn-back">돌아가기</a>
     </form>
 </div>
+
+<!-- 회원 탈퇴 -->
+<div style="margin-top: 32px; border-top: 1px solid #eee; padding-top: 20px;">
+    <form th:action="|/${loginType}/withdraw|" method="post"
+          onsubmit="return confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')">
+        <button type="submit" style="background:#e74c3c; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; font-size:15px;">
+            회원 탈퇴
+        </button>
+    </form>
+</div>
 </body>
 </html>
