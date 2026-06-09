@@ -109,7 +109,17 @@ public class UserController {
         }
     }
 
-    // 6. 회원 탈퇴
+    // 6. 로그아웃
+    @GetMapping("/logout")
+    public String logout(@PathVariable String loginType, HttpServletResponse response) {
+        Cookie expiredCookie = new Cookie("jwtToken", null);
+        expiredCookie.setMaxAge(0);
+        expiredCookie.setPath("/");
+        response.addCookie(expiredCookie);
+        return "redirect:/" + loginType + "/login";
+    }
+
+    // 7. 회원 탈퇴
     @PostMapping("/withdraw")
     public String withdraw(@PathVariable String loginType, Principal principal, HttpServletResponse response) {
         userService.deleteUser(principal.getName());
@@ -154,4 +164,6 @@ public class UserController {
             return "info";
         }
     }
+
+    
 }
