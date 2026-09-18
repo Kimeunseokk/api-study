@@ -8,24 +8,24 @@
 <body>
 <div>
     <h1>
-        <a th:href="@{/{type}(type=${loginType})}" th:text="${pageName}">홈 화면</a>
+        <a th:href="@{/home}" th:text="${pageName}">홈 화면</a>
     </h1>
     <hr>
 
     <div th:if="${nickname == null}">
         <h3>로그인 되어있지 않습니다!</h3>
-        <button th:onclick="|location.href='@{/{type}/join(type=${loginType})}'|">회원 가입</button>
+        <button th:onclick="|location.href='@{/join}'|">회원 가입</button>
         <br><br>
-        <button th:onclick="|location.href='@{/{type}/login(type=${loginType})}'|">로그인</button>
+        <button th:onclick="|location.href='@{/login}'|">로그인</button>
     </div>
 
     <div th:unless="${nickname == null}">
         <h3><span th:text="${nickname}"></span>님 환영합니다!</h3>
-        <button th:onclick="|location.href='@{/{type}/info(type=${loginType})}'|">설정</button>
+        <button th:onclick="|location.href='@{/info}'|">설정</button>
         <br><br>
-        <button th:onclick="|location.href='@{/{type}/admin(type=${loginType})}'|">관리자 페이지</button>
-        <br><br>
-        <button th:onclick="|location.href='@{/{type}/logout(type=${loginType})}'|">로그아웃</button>
+        <button th:if="${isAdmin}" th:onclick="|location.href='@{/admin}'|">관리자 페이지</button>
+        <br th:if="${isAdmin}"><br th:if="${isAdmin}">
+        <button th:onclick="|location.href='@{/logout}'|">로그아웃</button>
     </div>
 </div>
 </body>

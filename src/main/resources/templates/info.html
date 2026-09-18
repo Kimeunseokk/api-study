@@ -6,7 +6,7 @@
     <link rel="stylesheet" th:href="@{/css/info.css}"/>
 </head>
 <body>
-<h1><a th:href="|/${loginType}/home|">[[${pageName}]]</a></h1>
+<h1><a th:href="@{/home}">[[${pageName}]]</a></h1>
 <hr/>
 
 <!-- 성공/실패 메시지 -->
@@ -35,7 +35,7 @@
 <!-- 회원정보 수정 폼 -->
 <div class="edit-section">
     <h3>회원정보 수정</h3>
-    <form th:action="|/${loginType}/info|" th:object="${updateRequest}" method="post">
+    <form th:action="@{/info}" th:object="${updateRequest}" method="post">
         <div class="form-group">
             <label for="nickname">닉네임</label>
             <input type="text" id="nickname" th:field="*{nickname}" th:placeholder="${user.nickname}"/>
@@ -56,13 +56,13 @@
             <input type="password" id="passwordCheck" th:field="*{passwordCheck}" placeholder="새 비밀번호 확인"/>
         </div>
         <button type="submit">수정 완료</button>
-        <a th:href="|/${loginType}/home|" class="btn-back">돌아가기</a>
+        <a th:href="@{/home}" class="btn-back">돌아가기</a>
     </form>
 </div>
 
 <!-- 회원 탈퇴 -->
 <div class="withdraw-section">
-    <form th:action="|/${loginType}/withdraw|" method="post"
+    <form th:action="@{/withdraw}" method="post"
           onsubmit="return confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')">
         <button type="submit" class="btn-withdraw">회원 탈퇴</button>
     </form>

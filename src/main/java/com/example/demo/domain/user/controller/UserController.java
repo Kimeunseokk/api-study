@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 
 @Controller // HTML 화면 렌더링을 위한 컨트롤러
-@RequestMapping("/{loginType}") // HTML 폼 주소 구조(/{loginType}/...)와 매핑
 @RequiredArgsConstructor
 public class UserController {
 
@@ -33,8 +32,7 @@ public class UserController {
 
     // 1. 홈 화면 열기
     @GetMapping("/home")
-    public String home(@PathVariable String loginType, Principal principal, Model model) {
-        model.addAttribute("loginType", loginType);
+    public String home(Principal principal, Model model) {
         model.addAttribute("pageName", "홈 화면");
 
         if (principal != null) {
@@ -43,8 +41,10 @@ public class UserController {
             // 🚨 방어 코드 추가! (만약 토큰은 있는데 DB에서 유저가 삭제된 상태라면?)
             if (loginUser != null) {
                 model.addAttribute("nickname", loginUser.getNickname());
+                model.addAttribute("isAdmin", loginUser.getRole().name().equals("ADMIN"));
             } else {
                 model.addAttribute("nickname", "알 수 없는 사용자");
+                model.addAttribute("isAdmin", false);
             }
         }
 
@@ -53,8 +53,7 @@ public class UserController {
 
     // 2. 회원가입 화면 열기
     @GetMapping("/join")
-    public String signupForm(@PathVariable String loginType, Model model) {
-        model.addAttribute("loginType", loginType);
+    public String signupForm(Model model) {
         model.addAttribute("pageName", "회원가입");
         model.addAttribute("joinRequest", new UserSignupRequest()); // HTML의 th:object="${joinRequest}"와 바인딩
         return "join"; // templates/join.html 파일을 렌더링
@@ -62,18 +61,17 @@ public class UserController {
 
     // 3. 회원가입 처리
     @PostMapping("/join")
-    public String signup(@PathVariable String loginType, @ModelAttribute("joinRequest") UserSignupRequest userSignupRequest) {
+    public String signup(@ModelAttribute("joinRequest") UserSignupRequest userSignupRequest) {
         // @RequestBody 대신 @ModelAttribute를 사용하여 폼 데이터를 수신합니다.
         // DTO와 HTML 폼 양쪽에 이름(username), 이메일(email), 비밀번호(password),
         // 닉네임(nickname), 전화번호(phone) 필드가 정확히 매핑됩니다.
         userService.signup(userSignupRequest);
-        return "redirect:/"+ loginType + "/login"; // 가입 완료 후 로그인 화면으로 이동
+        return "redirect:/login"; // 가입 완료 후 로그인 화면으로 이동
     }
 
     // 4. 로그인 화면 열기
     @GetMapping("/login")
-    public String loginForm(@PathVariable String loginType, Model model) {
-        model.addAttribute("loginType", loginType);
+    public String loginForm(Model model) {
         model.addAttribute("pageName", "로그인");
         model.addAttribute("loginRequest", new UserLoginRequest()); // HTML의 th:object="${loginRequest}"와 바인딩
         return "login"; // templates/login.html 파일을 렌더링
@@ -81,8 +79,7 @@ public class UserController {
 
     // 5. 로그인 처리 및 JWT 발급
     @PostMapping("/login")
-    public String login(@PathVariable String loginType,
-                        @ModelAttribute("loginRequest") UserLoginRequest userLoginRequest,
+    public String login(@ModelAttribute("loginRequest") UserLoginRequest userLoginRequest,
                         HttpServletResponse response,
                         Model model) { // 💡 에러 메시지 전달을 위해 Model 추가
 
@@ -99,29 +96,28 @@ public class UserController {
             jwtCookie.setHttpOnly(true); // 자바스크립트에서 접근할 수 없도록 하여 XSS 공격 방어
             response.addCookie(jwtCookie); // 응답에 쿠키 추가
 
-            return "redirect:/" + loginType + "/home"; // 로그인 성공 후 홈 화면으로 이동
+            return "redirect:/home"; // 로그인 성공 후 홈 화면으로 이동
 
         } catch (AuthenticationException e) {
             System.out.println("로그인 실패 원인: " + e.getMessage());
             model.addAttribute("loginError", "아이디 또는 비밀번호가 일치하지 않습니다.");
-            model.addAttribute("loginType", loginType);
             return "login";
         }
     }
 
     // 6. 로그아웃
     @GetMapping("/logout")
-    public String logout(@PathVariable String loginType, HttpServletResponse response) {
+    public String logout(HttpServletResponse response) {
         Cookie expiredCookie = new Cookie("jwtToken", null);
         expiredCookie.setMaxAge(0);
         expiredCookie.setPath("/");
         response.addCookie(expiredCookie);
-        return "redirect:/" + loginType + "/login";
+        return "redirect:/login";
     }
 
     // 7. 회원 탈퇴
     @PostMapping("/withdraw")
-    public String withdraw(@PathVariable String loginType, Principal principal, HttpServletResponse response) {
+    public String withdraw(Principal principal, HttpServletResponse response) {
         userService.deleteUser(principal.getName());
 
         Cookie expiredCookie = new Cookie("jwtToken", null);
@@ -131,14 +127,13 @@ public class UserController {
 
         System.out.println("탈퇴 전달받은 이메일: " + principal.getName());
 
-        return "redirect:/" + loginType + "/login";
+        return "redirect:/login";
     }
 
     // 7. 회원정보 조회 화면
     @GetMapping("/info")
-    public String infoForm(@PathVariable String loginType, Principal principal, Model model) {
+    public String infoForm(Principal principal, Model model) {
         Users loginUser = userService.findByEmail(principal.getName());
-        model.addAttribute("loginType", loginType);
         model.addAttribute("pageName", "회원정보");
         model.addAttribute("user", loginUser);
         model.addAttribute("updateRequest", new UserUpdateRequest());
@@ -147,16 +142,14 @@ public class UserController {
 
     // 7. 회원정보 수정 처리
     @PostMapping("/info")
-    public String updateInfo(@PathVariable String loginType,
-                             @ModelAttribute("updateRequest") UserUpdateRequest updateRequest,
+    public String updateInfo(@ModelAttribute("updateRequest") UserUpdateRequest updateRequest,
                              Principal principal,
                              Model model) {
         try {
             userService.updateUser(principal.getName(), updateRequest);
-            return "redirect:/" + loginType + "/info?success";
+            return "redirect:/info?success";
         } catch (IllegalArgumentException e) {
             Users loginUser = userService.findByEmail(principal.getName());
-            model.addAttribute("loginType", loginType);
             model.addAttribute("pageName", "회원정보");
             model.addAttribute("user", loginUser);
             model.addAttribute("updateRequest", updateRequest);

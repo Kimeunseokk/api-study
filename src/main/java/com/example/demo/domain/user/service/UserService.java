@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.demo.domain.user.entity.Role;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -89,6 +91,22 @@ public class UserService {
     public Users findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 유저를 찾을 수 없습니다."));
+    }
+
+    public List<Users> findAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Transactional
+    public void updateRole(Long userId, Role role) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
+        user.setRole(role);
+    }
+
+    @Transactional
+    public void deleteUserById(Long userId) {
+        userRepository.deleteById(userId);
     }
 
     @Transactional

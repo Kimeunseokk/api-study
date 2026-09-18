@@ -8,6 +8,9 @@ build/
 # 시크릿 키가 있는 설정 파일 깃허브 업로드 방지
 src/main/resources/application.yml
 
+# 환경변수 (DB 비밀번호, JWT 시크릿 등)
+.env
+
 ### STS ###
 .apt_generated
 .classpath
