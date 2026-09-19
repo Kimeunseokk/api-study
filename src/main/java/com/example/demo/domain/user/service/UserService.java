@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.domain.user.entity.Role;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,12 +55,14 @@ public class UserService {
         return userRepository.existsByPhone(phone);
     } // 회원가입시 전화번호 중복 확인
 
+    @Cacheable(value = "usernameExists", key = "#username")
     public boolean checkUsernamedouplication(String username) {
         return userRepository.existsByUsername(username);
-    } // 회원가입시
+    } // 회원가입시 아이디 중복 확인 (외부에서 직접 호출될 때만 캐시 적용됨)
 
 
     @Transactional
+    @CacheEvict(value = "usernameExists", key = "#Request.username")
     public void signup(UserSignupRequest Request) {
         if(checkEmaildouplication(Request.getEmail())) {
             throw new IllegalArgumentException("Email already exists");

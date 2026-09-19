@@ -14,8 +14,12 @@
     <form th:method="post" th:action="@{/join}" th:object="${joinRequest}" onsubmit="return validateSignup()">
         <div class="form-group">
             <label for="username">이름</label>
-            <input type="text" id="username" th:field="*{username}" th:errorclass="error-input" placeholder="아이디를 입력하세요"/>
+            <div class="username-row">
+                <input type="text" id="username" th:field="*{username}" th:errorclass="error-input" placeholder="아이디를 입력하세요"/>
+                <button type="button" id="check-username-btn">중복확인</button>
+            </div>
             <div class="error-class" th:errors="*{username}"></div>
+            <div id="username-check-result"></div>
         </div>
         <div class="form-group">
             <label for="email">이메일</label>

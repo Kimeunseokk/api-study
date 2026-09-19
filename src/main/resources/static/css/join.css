@@ -58,6 +58,25 @@ input:focus { outline: none; border-color: #4a90e2; }
 .error-input { border-color: #e74c3c !important; }
 .error-class { color: #e74c3c; font-size: 12px; margin-top: 5px; }
 
+.username-row { display: flex; gap: 8px; }
+.username-row input { flex: 1; }
+.username-row button {
+    padding: 0 14px;
+    border: 1.5px solid #4a90e2;
+    border-radius: 8px;
+    background: white;
+    color: #4a90e2;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.username-row button:hover { background: #4a90e2; color: white; }
+
+#username-check-result { font-size: 12px; margin-top: 5px; }
+#username-check-result.available { color: #2ecc71; }
+#username-check-result.taken { color: #e74c3c; }
+
 .btn {
     display: block;
     width: 100%;

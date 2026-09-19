@@ -1,32 +1,33 @@
-// 1. 가입 버튼(또는 form) 요소를 가져옵니다.
-const registerButton = document.getElementById('register-btn');
+// 아이디 중복확인 버튼
+const checkUsernameBtn = document.getElementById('check-username-btn');
+const usernameInput = document.getElementById('username');
+const usernameCheckResult = document.getElementById('username-check-result');
 
-// 2. 버튼에 클릭 이벤트를 달아줍니다.
-registerButton.addEventListener('click', function(e) {
-    // 💡 중요! 폼 제출 시 브라우저가 제멋대로 새로고침하는 걸 막아줍니다.
-    e.preventDefault();
+checkUsernameBtn.addEventListener('click', function () {
+    const username = usernameInput.value.trim();
 
-    // (여기에 사용자가 입력한 아이디, 비밀번호 등을 가져오는 코드 작성)
-    const userData = {
-        /* 예: username: document.getElementById('id').value ... */
-    };
+    if (!username) {
+        alert('아이디를 먼저 입력해주세요.');
+        return;
+    }
 
-    // 3. 서버(스프링 부트)로 데이터를 보냅니다.
-    fetch('/register', { // 스프링 부트 컨트롤러의 주소
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-    })
-    .then(response => {
-        // 4. 서버에서 저장 성공 신호(예: 200 OK)가 왔다면?
-        if (response.ok) {
-            alert('회원가입이 완료되었습니다!');       // 알림창 띄우기
-            window.location.href = '/login';       // 로그인 페이지로 이동하기! (경로는 프로젝트에 맞게 수정)
-        } else {
-            alert('회원가입에 실패했습니다. 다시 시도해 주세요.');
-        }
-    })
-    .catch(error => {
-        console.error('에러 발생:', error);
-    });
+    usernameCheckResult.textContent = '확인 중...';
+    usernameCheckResult.className = '';
+
+    fetch('/check-username?username=' + encodeURIComponent(username))
+        .then(response => response.json())
+        .then(exists => {
+            if (exists) {
+                usernameCheckResult.textContent = '이미 사용 중인 아이디입니다.';
+                usernameCheckResult.className = 'taken';
+            } else {
+                usernameCheckResult.textContent = '사용 가능한 아이디입니다.';
+                usernameCheckResult.className = 'available';
+            }
+        })
+        .catch(error => {
+            console.error('중복확인 요청 실패:', error);
+            usernameCheckResult.textContent = '중복확인 중 오류가 발생했습니다.';
+            usernameCheckResult.className = 'taken';
+        });
 });

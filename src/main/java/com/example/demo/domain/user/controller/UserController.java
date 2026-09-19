@@ -59,6 +59,17 @@ public class UserController {
         return "join"; // templates/join.html 파일을 렌더링
     }
 
+    // 2-1. 아이디 중복확인 (Redis 캐시 적용 확인용)
+    @GetMapping("/check-username")
+    @ResponseBody
+    public boolean checkUsername(@RequestParam String username) {
+        long start = System.currentTimeMillis();
+        boolean exists = userService.checkUsernamedouplication(username);
+        long elapsed = System.currentTimeMillis() - start;
+        System.out.println("[조회시간] username=" + username + " → " + elapsed + "ms");
+        return exists;
+    }
+
     // 3. 회원가입 처리
     @PostMapping("/join")
     public String signup(@ModelAttribute("joinRequest") UserSignupRequest userSignupRequest) {
